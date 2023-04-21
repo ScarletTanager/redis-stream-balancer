@@ -2,8 +2,12 @@ package rsb
 
 // hash.go: provide calculation/management of redis hash slots
 
-const SLOT_COUNT uint16 = 16384 // 16384
-const WORD_COUNT = 256          // 256
+const (
+	SLOT_COUNT uint16 = 16384 // 16384
+
+	INIT uint16 = 0x0000
+	XOR  uint16 = 0x0000
+)
 
 var CRC_TABLE [256]uint16 = [256]uint16{
 	0x0000, 0x1021, 0x2042, 0x3063, 0x4084, 0x50a5, 0x60c6, 0x70e7,
@@ -46,16 +50,11 @@ func SlotFromString(s string) uint16 {
 
 // We only need CRC-CCITT (AKA CRC-XMODEM, CRC-ZMODEM, etc.)
 func CRC16(b []byte) uint16 {
-	var (
-		initVal uint16 = 0x0000
-		xor     uint16 = 0x0000
-	)
-
-	crc := initVal
+	crc := INIT
 
 	for _, dataByte := range b {
 		crc = crc<<8 ^ CRC_TABLE[byte(crc>>8)^dataByte]
 	}
 
-	return crc ^ xor
+	return crc ^ XOR
 }
